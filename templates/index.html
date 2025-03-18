@@ -12,49 +12,53 @@
             background: linear-gradient(to bottom right, #000000, #0d1b2a);
             color: white;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
         }
 
-        /* Стиль для контейнера */
+        /* Основной контейнер */
+        .main-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        /* Левая панель (форма и результаты) */
+        .left-panel {
+            width: 60%;
+        }
+
         .container {
-            background-color: #161b22; /* Темно-серый */
-            border: 2px solid #0074D9; /* Синий */
+            background-color: #161b22;
+            border: 2px solid #0074D9;
             border-radius: 10px;
             padding: 20px;
-            width: 90%;
-            max-width: 600px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
 
-        /* Заголовок */
         h1 {
             text-align: center;
-            color: #ffffff; /* Белый */
+            color: #ffffff;
             margin-bottom: 20px;
         }
 
-        /* Текстовое поле */
         textarea {
             width: 100%;
             height: 150px;
             padding: 10px;
-            border: 2px solid #0074D9; /* Синий */
+            border: 2px solid #0074D9;
             border-radius: 5px;
-            background-color: #1e293b; /* Темно-синий */
+            background-color: #1e293b;
             color: white;
             font-size: 16px;
             resize: none;
         }
 
-        /* Кнопка */
         button {
             margin-top: 15px;
             width: 100%;
             padding: 10px;
-            background-color: #0074D9; /* Синий */
+            background-color: #0074D9;
             color: white;
             border: none;
             border-radius: 5px;
@@ -64,12 +68,7 @@
         }
 
         button:hover {
-            background-color: #0056b3; /* Темнее синий */
-        }
-
-        /* Результат (извлеченные сущности) */
-        .entities {
-            margin-top: 20px;
+            background-color: #0056b3;
         }
 
         .entities ul {
@@ -78,34 +77,93 @@
         }
 
         .entities li {
-            background-color: #1e293b; /* Темно-синий */
-            border: 1px solid #0074D9; /* Синий */
+            background-color: #1e293b;
+            border: 1px solid #0074D9;
             border-radius: 5px;
             padding: 10px;
             margin-bottom: 10px;
             font-size: 14px;
         }
+
+        /* Правая панель (история запросов) */
+        .right-panel {
+            width: 30%;
+        }
+
+        .history-container {
+            background-color: #161b22;
+            border: 2px solid #0074D9;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background-color: #1e293b;
+            border: 1px solid #0074D9;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .history-item:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Named Entity Recognition</h1>
-        <form action="{% url 'extract_entities' %}" method="post">
-            {% csrf_token %}
-            <textarea name="text" rows="10" cols="50" placeholder="Enter your text here..."></textarea><br><br>
-            <button type="submit">Extract Entities</button>
-        </form>
+    <div class="main-container">
+        <!-- Левая панель -->
+        <div class="left-panel">
+            <div class="container">
+                <h1>Named Entity Recognition</h1>
+                <form action="{% url 'extract_entities' %}" method="post">
+                    {% csrf_token %}
+                    <textarea name="text" rows="10" cols="50" placeholder="Enter your text here..."></textarea><br><br>
+                    <button type="submit">Extract Entities</button>
+                </form>
 
-        {% if entities %}
-        <div class="entities">
-            <h2>Extracted Entities:</h2>
-            <ul>
-                {% for entity in entities %}
-                <li><strong>{{ entity.label }}:</strong> {{ entity.text }}</li>
-                {% endfor %}
-            </ul>
+                {% if entities %}
+                <div class="entities">
+                    <h2>Extracted Entities:</h2>
+                    <ul>
+                        {% for entity in entities %}
+                        <li><strong>{{ entity.label }}:</strong> {{ entity.text }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
         </div>
-        {% endif %}
+
+        <!-- Правая панель -->
+        <div class="right-panel">
+            <div class="history-container">
+                <h2>History</h2>
+                {% if history %}
+                <div>
+                    {% for item in history %}
+                    <div class="history-item" onclick="showDetails('{{ item.text }}', {{ item.entities|safe }})">
+                        <strong>{{ item.created_at|date:"Y-m-d H:i" }}</strong>: {{ item.text|truncatechars:30 }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p>No history available.</p>
+                {% endif %}
+            </div>
+        </div>
     </div>
+
+    <script>
+        // Функция для отображения деталей выбранного запроса
+        function showDetails(text, entities) {
+            alert(`Text: ${text}\nEntities: ${JSON.stringify(entities)}`);
+        }
+    </script>
 </body>
 </html>
