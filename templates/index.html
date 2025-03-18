@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Named Entity Recognition</title>
+</head>
+<body>
+<h1>Extract Named Entities</h1>
+<form action="{% url 'extract_entities' %}" method="post">
+    {% csrf_token %}
+    <textarea name="text" rows="10" cols="50" placeholder="Enter your text here..."></textarea><br><br>
+    <button type="submit">Extract Entities</button>
+</form>
+
+{% if entities %}
+    <h2>Extracted Entities:</h2>
+    <ul>
+        {% for entity in entities %}
+            <li>{{ entity.label }}: {{ entity.text }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+</body>
+</html>
